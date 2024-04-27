@@ -55,11 +55,12 @@ The BuzzAler project is an innovative alarm system designed to enhance security 
 
 
 * **Medium Vibration Sensor**
+  
   The vibration sensor is used to detect if someone is trying to force the door, in an unintended way, a medium one is used beacuse after some experiments it was the one that acts better, providing more accurate results.
 
   
 * **Servo Motor S51**
-
+ 
   The servo motor is used to open or close the lock installed on the door, based on the value returned by the vibration and ultrasonic sensor, or provided by the user using the web app. (the datasheet of the servo motor can be found here)
 
 ## Software
@@ -102,20 +103,23 @@ The following image represents a description of the entire network system that w
 
 ## Working Principle
 
-This IoT system plays the role of monitoring temperatures and humidity ***(with the DHT11 sensor )*** and then triggers a cooling system if the temperature exceeds the threshold temperature. In addition, there is a 7-segment display ***(5611BH)*** which indicates the status of the cooling system, which consists of a motor ***(mabuchi FC-130 RA/SA)*** and a fan. The status is indicated with 0 if the fan is off, 1 if the fan is on, and 2 if the fan has received an external command that has changed system modes.
+This project has two different principles, detecting intruders and locking a door, the working principle is very easy : there is an ***(Ultrasonic sensor)*** that senses the distance, if the distance changes it means that the door is Closing/Opening, at this point if the alarm part of the project is in state ***(ON)*** the ***(Buzzer)*** will be triggered emitting a strong noise in order to alert the owner,also the ***(LED)*** will flash to provide a visible feedback, this change will also be visible on the ***(WebPage)*** in the ***(STATE)*** section.
+The second part of the project is a SmartLock, using a ***(Servo Motor)*** the locker on the door can be ***(Released/Closed)***, when the locker is in state Closed the ***(Vibration Sensor)*** is actived to detect possible intruders, trying to destroy the door.
 
-The system has three system modes, 0 : AUTO , 1 : ON , 2 : OFF , where they indicate respectively : system in automatic mode, system always on, system always off. They refer to the operation of the cooling engine, also , can be set by the user remotely through the user interface provided in the web application.
-The board during the first startup, is initialized with the system in automatic mode. The automatic mode consists of performing computational calculations on the data read from the sensors, i.e. we check whether the temperature read from the sensor is greater than the threshold temperature, if it is the case the cooling motor is triggered. This is achieve by the activation of the GPIO pin linked to the base of transistor, in this way the transistor ***(2N3904)*** allows current flow into the motor. Timers and flags have been added to ensure that the engine start procedure, like the shutdown procedure do not cause interference with the system and are not repeated in case the same condition is regenerated repeatedly. 
-The ON mode, always keeps the engine running, vice versa for the OFF mode, however, both ensure the sensor data is read and sent to allow the user to monitor the data from the graphs in the web app.
+More in detail:
 
-The polling and 'sending of data from the board into the cloud was decided to make it periodic with an interval of about 10 seconds. This avoids an aggregation of the data being sent, preventing any traffic congestion. In addition, much of the computation is done at the edge level, avoiding high latency when sending data to the cloud, all because the board can support computation. In this way, the only thing we send to the cloud is a message containing the temperature and humidity. 
+  **(Activation)**
+    In this phase all the sensors are initialized,
+
+An important aspect is the fact that only relevant data are sent to the Cloud, since the board it's capable of some basic computation, when the Ultrasonic Sensor detects a change in the distance it computes locally the distance and will send the information to the Cloud only if there is a change in the State of the application, not only in the Distances.
+This is done to avoid sending Data that are not relevant preserving the network and also to minimize congestion, avoiding collision, that can create delay and wrong information to the final user.
 
 ### General Description
 
 Data management and sending within this project is done using the MQTT protocol. We have the board connected to the mosquitto.rsmb server and our AwS IoTCore service which are connected through a transparent bridge that we wrote in python. We therefore have our mqtt broker which we have subscribed to the "topic_data" topic and our AwS IoTCore broker which is instead subscribed to the "topic_board" topic.
 
 The board builds the information to send and publishes it on the topic: *topic_data*, the transparent bridge captures this message and sends it by invoking a lambda function on a topic to which we have subscribed the AwSIoTCore and then save it on a table in DynamoDB .
-An important aspect of this operation is the Policy that we associate with our object in AwSIoTCore, here is an [example of policy](/IoTCore_thing/windforme-Policy).
+An important aspect of this operation is the Policy that we associate with our object in AwSIoTCore, here is an [example of policy](/IoTCore_thing/windforme-Policy).  ****ADD LINK TO POLICY
 
 Two-way communication has been implemented, so from our web application we can communicate with the board.
 For the moment the only functionality that has been implemented is the sending of a message that changes the system mode of the entire application. The message generated by the web application is published through a lambda function on the topic: *topic_board* . The transparent bridge is activated to carry the message published on the broker of the board, in order to trigger the callback function of the mqtt protocol.  The message is then processed in order to extract the command to be executed.
@@ -126,7 +130,7 @@ Also, it is possible to trigger from the WebApplication the synchronization of i
 
 ### Network performance
 
-Via a tool for analyze packets in the network is possible to see how are our packets.In our network there will be transmitted only the temperature and humidity data, futhermore from the webapp in the board will be transmitted only a message with special words for system command.
+Using a packet analyzer tool it is possible to know the weight of the packets.
 
 So in the first case we have a message that is lees than 37bytes. In the second case in the worst case since we need to send one of [ auto - on - off ] his length is maximum 5bytes . In both cases we have a very short latency, one caused from when the sensor register a new value and the other one from when a button is clicked on the web app to when the system acts. This latency are short enough to not affect the usability of the system.
 
@@ -142,7 +146,7 @@ In this way the network latency does not influence the capability of the device.
 
 ### Cloud Computing
 
-The only part that works on cloud , so in the specific on AWS. It receives the temperature and humidity data from the devices and then are stored on DynamoDB. The following rule manages the execution flow of this operation.
+The Cloud part of the project is performed by AWS, that receives the payload containing **"Read,PastRead and State"** on the MQTT broker and through a custom RULE saves them in **"Black_Table"**, that is the DynamoDB table used.
 ![image](/docs/sharedpictures/AwSIoTRule.png) (QUA FOTO DELLA RULE CHE METTE I DATI IN SQL SU DYNAMODB)
 
 ## Setup & Run 
