@@ -103,19 +103,39 @@ The following image represents a description of the entire network system that w
 
 ## Working Principle
 
-This project has two different principles, detecting intruders and locking a door, the working principle is very easy : there is an ***(Ultrasonic sensor)*** that senses the distance, if the last two reads are shows a difference that is greater than 20CM it means that the door is Closing/Opening, at this point if the alarm part of the project is in state ***(ON)*** the ***(Buzzer)*** will be triggered emitting a strong noise in order to alert the owner,also the ***(LED)*** will flash to provide a visible feedback, this change will also be visible on the ***(WebPage)*** in the ***(STATE)*** section.
-The second part of the project is a SmartLock, using a ***(Servo Motor)*** the locker on the door can be ***(Released/Closed)***, when the locker is in state Closed the ***(Vibration Sensor)*** is actived to detect possible intruders, trying to destroy the door.
+This project integrates two main functionalities: intruder detection and door locking.
 
-More in detail:
+The system operates as follows:
+- An ultrasonic sensor measures distance.
+- If the difference between the last two readings is greater than 20 cm, it indicates the door is opening or closing.
+- If the alarm is activated (in the "ON" state), a buzzer emits a loud noise and an LED flashes to alert the owner.
+- The current state is displayed on a webpage in the "STATE" section.
+- A servo motor controls the door lock, enabling locking and unlocking.
+- A vibration sensor detects attempts to tamper with or break the door when locked.
 
-  **(Activation)**
-    In this phase all the sensors are initialized, showing up in the console if some errors occurs, in case of wrong wiring or other software problems, the the board will subscribe to the topic in which it will publish the relevant data, through a transparent bridge written in python, all the tecnical stuff regarding this will be discussed later.
-    When the initialization phase is completed we have two different configuations, if the system is in state `SmartLock` the Vibration Sensor its activated to detect intruders, if it sense a vibration level greater than the threeshold, that has been chosen according to some test performed, and it is the upper bound needed if we don't want to loose any information, a signal will be triggered and the buzzer will start to produce noise, also the led its triggered and a visual feedback is given on the WebApp.
-    If we are in state `SmartAlarm` the board will enter a loop that senses the distance every 2 seconds, this threeshold has been chosen according to some test performed, and it is the upper bound needed if we don't want to loose any information, the value chosen for the Ultrasonic Sensor has been choosen in the same way as the Vibration Sensor one.
-    
+#### `Activation Phase`
 
-An important aspect is the fact that only relevant data are sent to the Cloud, since the board it's capable of some basic computation, when the Ultrasonic Sensor detects a change in the distance it computes locally the distance and will send the information to the Cloud only if there is a change in the State of the application, not only in the Distances.
-This is done to avoid sending Data that are not relevant preserving the network and also to minimize congestion, avoiding collision, that can create delay and wrong information to the final user.
+- All sensors are initialized, and any errors (e.g., wiring issues or software problems) are reported in the console.
+- The board subscribes to a topic for publishing relevant data using a Python-based transparent bridge.
+
+#### `SmartLock Mode`
+
+- Activates the vibration sensor to detect intruders.
+- Triggers an alert (buzzer and LED) if vibrations exceed a predetermined threshold.
+- Provides visual feedback on a WebApp.
+
+#### `SmartAlarm Mode`
+
+- Continuously monitors distance using the ultrasonic sensor at 2-second intervals.
+- Local computation and cloud data transmission occur only upon a change in application state, optimizing data transmission and network performance.
+
+#### `Data Transmission Optimization`
+
+- Sends only relevant data to the cloud, minimizing unnecessary transmission.
+- Leverages local computation to optimize network performance and prevent delays.
+
+This project prioritizes efficient intruder detection and door security through optimized sensor utilization and smart data transmission strategies.
+
 
 ### General Description
 
