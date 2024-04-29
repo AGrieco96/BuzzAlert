@@ -19,11 +19,11 @@ The BuzzAler project is an innovative alarm system designed to enhance security 
 
 ## Hardware
 
-* **Board : Nucleo f401RE**
+* **Board : `Nucleo-f401re`**
 
   The Nucleo F401RE is a development board based on the STM32F401RE microcontroller. The STM32F401RE is a high-performance microcontroller from STMicroelectronics that is part of the STM32 family of 32-bit Arm Cortex-M4 microcontrollers. The board includes an ARM Cortex-M4 core microcontroller running at up to 84MHz with 512KB of flash memory and 96KB of RAM. It also includes a variety of peripherals, including multiple timers, communication interfaces (UART, SPI, I2C, CAN), and analog-to-digital converters.
 
-* **Ultrasonic Sensor : HC-SR04**
+* **Ultrasonic Sensor : `HC-SR04`**
 
   HC-SR04 is an ultrasonic ranging sensor that provides 2 cm to 400 cm non-contact measurement function. The ranging accuracy can reach 3mm, and the effectual angle is less than 15°. It can be powered from a 5V power supply.
 
@@ -38,7 +38,7 @@ The BuzzAler project is an innovative alarm system designed to enhance security 
   - Echo Output Signal: Input TTL lever signal and the range in proportion
   - Dimensions: 45 * 20 * 15mm
 
-* **Buzzer**
+* **`Buzzer`**
 
   The buzzer is powered by 6V DC and has the following pin configuration:
   - Positive: Identified by (+) symbol or longer terminal lead. Can be powered by 6V DC.
@@ -54,12 +54,12 @@ The BuzzAler project is an innovative alarm system designed to enhance security 
   - Breadboard and Perf board friendly
 
 
-* **Medium Vibration Sensor**
+* **`Medium Vibration Sensor`**
   
   The vibration sensor is used to detect if someone is trying to force the door, in an unintended way, a medium one is used beacuse after some experiments it was the one that acts better, providing more accurate results.
 
   
-* **Servo Motor S51**
+* **`Servo Motor S51`**
  
   The servo motor is used to open or close the lock installed on the door, based on the value returned by the vibration and ultrasonic sensor, or provided by the user using the web app. (the datasheet of the servo motor can be found here)
 
@@ -94,22 +94,25 @@ The following image represents a description of the entire network system that w
   A transparent bridge written in python that works as a bridge exchanging messages using MQTT between broker (In our case the broker : are the "board" and the AwS IoT Core). It reads messages from the local broker with "topic_data" and publishes them to AWS IoTCore on the same topic. It also reads messages from AWS IoT Core with "topic_board" and publishes them on the local broker with the same topic.
 
 * **AwS Services**  
-  This is the cloud part. Once the data arrives to AwS IoT Core, it will be processed and store on AWS Services : DynamoDB. Then are available some Lambda function that are invoked from the WebApp.
+  This is the cloud part. Once the data arrives to AwS IoT Core, using a role they will be stored in a table created using the DynamoDB service. At this point using another AwS service, `Lambda Function` they are exposed on an HTTP endpoint, used by the WebApp to visualize the state of the alarm.
     
-  This process varies from user to user, in our case we set up our rules, our iam, all this in order to grant specific permissions for different AwS services.
+  To achieve this its needed to create an `IAM Role` in AwS, create some rules and some policies to respectively grant access and perform actions.
 
-  AwS Amplify then is used to host our application. The User Interface is fully understandable, and it display and monitor the temperature and humidity data. It can also display some measurements that we make in order to be able to have an overview of the trend of the data collected by the sensor, such as average, maximum, minimum and variation. Futhermore from our web application we can send special commands to the board.
+  AwS Amplify then is used to host our application. The WebApp is simple and clear, on the main page it displays the state, `Active/Inactive`, the story of all the intruders detected and other stuff, there is also a button to shutdown or powerup the system remotely and obviously another button to switch from SmartAlarm to SmartLock easily.
 
 
 ## Working Principle
 
-This project has two different principles, detecting intruders and locking a door, the working principle is very easy : there is an ***(Ultrasonic sensor)*** that senses the distance, if the distance changes it means that the door is Closing/Opening, at this point if the alarm part of the project is in state ***(ON)*** the ***(Buzzer)*** will be triggered emitting a strong noise in order to alert the owner,also the ***(LED)*** will flash to provide a visible feedback, this change will also be visible on the ***(WebPage)*** in the ***(STATE)*** section.
+This project has two different principles, detecting intruders and locking a door, the working principle is very easy : there is an ***(Ultrasonic sensor)*** that senses the distance, if the last two reads are shows a difference that is greater than 20CM it means that the door is Closing/Opening, at this point if the alarm part of the project is in state ***(ON)*** the ***(Buzzer)*** will be triggered emitting a strong noise in order to alert the owner,also the ***(LED)*** will flash to provide a visible feedback, this change will also be visible on the ***(WebPage)*** in the ***(STATE)*** section.
 The second part of the project is a SmartLock, using a ***(Servo Motor)*** the locker on the door can be ***(Released/Closed)***, when the locker is in state Closed the ***(Vibration Sensor)*** is actived to detect possible intruders, trying to destroy the door.
 
 More in detail:
 
   **(Activation)**
-    In this phase all the sensors are initialized,
+    In this phase all the sensors are initialized, showing up in the console if some errors occurs, in case of wrong wiring or other software problems, the the board will subscribe to the topic in which it will publish the relevant data, through a transparent bridge written in python, all the tecnical stuff regarding this will be discussed later.
+    When the initialization phase is completed we have two different configuations, if the system is in state `SmartLock` the Vibration Sensor its activated to detect intruders, if it sense a vibration level greater than the threeshold, that has been chosen according to some test performed, and it is the upper bound needed if we don't want to loose any information, a signal will be triggered and the buzzer will start to produce noise, also the led its triggered and a visual feedback is given on the WebApp.
+    If we are in state `SmartAlarm` the board will enter a loop that senses the distance every 2 seconds, this threeshold has been chosen according to some test performed, and it is the upper bound needed if we don't want to loose any information, the value chosen for the Ultrasonic Sensor has been choosen in the same way as the Vibration Sensor one.
+    
 
 An important aspect is the fact that only relevant data are sent to the Cloud, since the board it's capable of some basic computation, when the Ultrasonic Sensor detects a change in the distance it computes locally the distance and will send the information to the Cloud only if there is a change in the State of the application, not only in the Distances.
 This is done to avoid sending Data that are not relevant preserving the network and also to minimize congestion, avoiding collision, that can create delay and wrong information to the final user.
