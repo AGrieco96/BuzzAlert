@@ -197,7 +197,7 @@ The Cloud part of the project is performed by AWS, that receives the payload,con
   You need to setup a thing on this services then you need to download some certification, they need to look like the ones that are in IoTCore_thing folder. The most important thing is the Policy, in order to use this project you should have a Policy like [windforme-Policy](/IoTCore_thing/windforme-Policy).  
   Then you need to construct a messagging rules like the one described before in the cloudcomputing part in order to write in the dynamodb table the data received from the board.
 * **Lambda function**.  
-  Write two lambda functions such as [publish_to_iotcore](/LambdaFunctions/publish_to_iotcore.py) and [read_data](/LambdaFunctions/read_data.py).  
+  Write two lambda functions such as [publish_to_IoTCore](/aWs/lambda/publish_to_IoTCore.py) and [read_data](/aWs/lambda/read_value.py).  
   If they are created on aws lambda, pay attention to the role, you probably need to use the IAM management console to customize them. 
   In fact, for the first lambda function, I applied the AWSIoTFullAccess policy to the specific associated role, then for the second lambda function, however, I modified the policy already attached to the associated role and added write permission on dynamodb services.
 * **DynamoDB**.  
