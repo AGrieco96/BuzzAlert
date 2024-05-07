@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <title>SECURIOT</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <title>BuzzAlert</title>
 
   <!-- Bootstrap -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -41,13 +41,13 @@
             <img src="img/test4.png" class="rocket animated bounce">
         </div>
         <div class="col-md-7" style="text-align: right;"> <!-- Modifica per posizionare più a destra -->
-            <h1>SECURIOT IoT Application</h1>
+            <h1>BuzzAlert IoT Application</h1>
             <h3>University IoT Project in Sapienza </h3>
             <h4>2023/2024</h4>
             <div style="text-align: center; padding-left: 350px;">
-                <a href="https://github.com/nardoz-dev/WINDFORME" class="btn btn-lg btn-red">GitHub Repo</a>
+                <a href="https://github.com/AGrieco96/BuzzAlert" class="btn btn-lg btn-red">GitHub Repo</a>
                 <br>
-                <a href="https://www.hackster.io/nardomen96/automatic-ventilation-system-6d643e" class="btn btn-lg btn-red">BlogPost</a>
+                <a href="INSERIRE LINK AL BLOGPOST" class="btn btn-lg btn-red">BlogPost</a>
             </div>
         </div>
    
@@ -58,28 +58,21 @@
   <div class="container">
     <!-- Start: Data -->
     <div class="row me-row content-ct speaker" id="data">
-      <h2 class="row-title">Data Collection</h2>
-          <!--Charts-->
+      <h2 class="row-title">Alarm History</h2>
+           
+          <!-- Div per il grafico di Plotly -->
+          <div id="myChart"></div>
 
-          <div class="myChart">
-            <canvas id="myChart"></canvas>
-            <!--Measurements-->
-            <div class="data_value">
-              <p id="AVG_temp">AVG : none</p>
-              <p id="MAX_temp">MAX : none</p>
-              <p id="MIN_temp">MIN : none</p>
-              <p id="delta_temp">Variation in last Hour: none</p>
-            </div>
-          </div>
-    
           <!-- End: Header -->
             <!-- Start: Operation Buttons -->
             <div class="row" style="padding-top:20px">
+              <p id="current_state">Current State : </p>
                     <div style="background-color: #f2f2f2; padding: 20px; border-radius: 5px;">
                         <h4 style="margin-bottom: 20px; text-align: center; color: #2c3e50;">Operation</h4>
                         <div id="relay_buttons"> <!-- Div dei bottoni -->
-                            <button type="button" onclick="postLambdaFunction('ON')" class="btn btn-lg btn-red">ON</button>
-                            <button type="button" onclick="postLambdaFunction('OFF')" class="btn btn-lg btn-red">OFF</button>
+                            <button type="button" onclick="postLambdaFunction('0')" class="btn btn-lg btn-red">SMART ALARM</button>
+                            <button type="button" onclick="postLambdaFunction('1')" class="btn btn-lg btn-red">SMART LOCK</button>
+                            <button type="button" onclick="postLambdaFunction('2')" class="btn btn-lg btn-red">OFF</button>
                         </div>
                     </div>
             </div>
@@ -95,7 +88,7 @@
   <div class="container-fluid footer">
     <div class="row footer-credit">
       <div class="col-md-6 col-sm-6">
-        <p>&copy; 2024, <a href="linkgithub">autore</a> | All rights reserved.</p>
+        <p>&copy; 2024, <a href="https://github.com/AGrieco96">AGrieco96</a> | All rights reserved.</p>
       </div>
     </div>
   </div>
