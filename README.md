@@ -64,8 +64,7 @@ The BuzzAler project is an innovative alarm system designed to enhance security 
   The servo motor is used to open or close the lock installed on the door, based on the value returned by the vibration and ultrasonic sensor, or provided by the user using the web app. (the datasheet of the servo motor can be found here)
 
 ## Software
-<img src="docs/sharedpictures/RiotOsLogo.png" width="200" align="right"/>
-(QUA LOGO RIOT OS)
+<img src="asset/riot_logo.png" width="200" align="right"/>
 
 * ### RIOT OS
 
@@ -77,7 +76,7 @@ The BuzzAler project is an innovative alarm system designed to enhance security 
 
 The following image represents a description of the entire network system that we can find within the project.
 
-![image](/docs/sharedpictures/NetworkArchitecture.png) (QUA FOTO DELLA RETE)
+![image](/asset/network_architecture.jpg) 
 
 
 * **Board**  
@@ -139,6 +138,8 @@ This project prioritizes efficient intruder detection and door security through 
 
 ### General Description
 
+<img src="asset/aws_logo.png" width="200" align="right"/>
+
 Data management and transmission in this project utilize the MQTT protocol. The board is connected to the mosquitto.rsmb server and AWS IoT Core service through a transparent Python-written bridge. The MQTT broker is subscribed to the topic_data topic, while the AWS IoT Core broker is subscribed to the topic_board topic.
 
 #### Data Flow
@@ -187,7 +188,7 @@ In this way the network latency does not influence the capability of the device.
 ### Cloud Computing
 
 The Cloud part of the project is performed by AWS, that receives the payload,containing the state of the system, so if an alarm is triggered, on the MQTT broker and through a custom RULE saves them in **"Black_Table"**, that is the DynamoDB table used.
-![image](/docs/sharedpictures/AwSIoTRule.png) (QUA FOTO DELLA RULE CHE METTE I DATI IN SQL SU DYNAMODB)
+![image](/asset/write_black.jpg) 
 
 ## Setup & Run 
 
