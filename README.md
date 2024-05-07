@@ -159,7 +159,7 @@ Data management and transmission in this project utilize the MQTT protocol. The 
 
 - **AWS IoT Core Policy:**
   - An essential part of the operation is the Policy associated with the AWS IoT Core object.
-  - Example Policy: [Policy Link](insert_link_here).
+  - Example Policy: [Policy Link](aWs/thing/blackboard-Policy).
 
 - **IAM Policies for Lambda Functions:**
   - Lambda functions are assigned IAM Policies based on the services they offer, ensuring appropriate permissions.
