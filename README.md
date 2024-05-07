@@ -15,7 +15,7 @@ BuzzAlert - IoT University Project for the IoT 2022 Course @ Sapienza University
 The BuzzAler project is an innovative alarm system designed to enhance security and provide remote access and control capabilities. With its integrated ultrasonic sensor, buzzer, Servo motor, RGB LED, vibration detection sensor and Nucleo F401RE development board, BuzzAlert offers comprehensive monitoring and control of your door's security status. Leveraging cloud connectivity, users can remotely access and manage the system, ensuring peace of mind and heightened security for homes or offices.
 
 ## Architecture Design
-![image](/path/to/your/image.png) (QUA CI METTI FOTO ARCHITETTURA)
+![image](/asset/BlackSketch.png) 
 
 ## Hardware
 
