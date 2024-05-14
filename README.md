@@ -192,19 +192,43 @@ The Cloud part of the project is performed by AWS, that receives the payload,con
 
 ## Setup & Run 
 
-### Configuration AWS Environment
-* **AWS IoTCore**.  
-  You need to setup a thing on this services then you need to download some certification, they need to look like the ones that are in IoTCore_thing folder. The most important thing is the Policy, in order to use this project you should have a Policy like [windforme-Policy](/IoTCore_thing/windforme-Policy).  
-  Then you need to construct a messagging rules like the one described before in the cloudcomputing part in order to write in the dynamodb table the data received from the board.
-* **Lambda function**.  
-  Write two lambda functions such as [publish_to_IoTCore](/aWs/lambda/publish_to_IoTCore.py) and [read_data](/aWs/lambda/read_value.py).  
-  If they are created on aws lambda, pay attention to the role, you probably need to use the IAM management console to customize them. 
-  In fact, for the first lambda function, I applied the AWSIoTFullAccess policy to the specific associated role, then for the second lambda function, however, I modified the policy already attached to the associated role and added write permission on dynamodb services.
-* **DynamoDB**.  
-  Simply creates a table called "your_table_name," the name of which must be the same as written in the read_data lambda function.
-* **AWSAmplify** ***not strictly necessary***.  
-  You can hosts the entire webApp folder on the AWSAmplify service. 
-  By the way, you can test the application on localhost.
+### AwS configuration
+
+* **Create a Thing :**
+
+  - Access the AWS IoT Core console.
+  - Define a new Thing to represent your device.
+
+* **Define IoT Policies:**
+
+  - Create an IoT policy specifying permissions required by your Thing.
+  - Grant necessary privileges like publish and subscribe permissions for IoT operations.
+
+* **IoT Core Rules:**
+
+  - Configure an IoT Core Rule to process incoming messages from your device.
+  - Define actions (e.g., invoking Lambda functions) based on subscribed MQTT topics
+
+* **Develop and Configure Lambda Functions:**
+
+  - Create two Lambda functions:
+    - [publish_to_IoTCore](/AwS/lambda/publish_to_IoTCore.py): Handles publishing messages to AWS IoT Core.
+    - [read_value](/AwS/lambda/read_value.py): Processes incoming messages and stores data in DynamoDB.
+  
+* **IAM Role Configuration:**
+
+ - Configure Lambda execution roles:
+
+    - Attach AWSIoTFullAccess policy for publish_to_iotcore to enable publishing to IoT Core.
+    - Modify the role's policy for read_data to grant DynamoDB write permissions (e.g., dynamodb:PutItem).
+
+* **Create a DynamoDB Table:**
+
+  - Define a DynamoDB table to store data received from the IoT device.
+  - Deploy Web Application with AWS Amplify:
+
+* **AWS Amplify**
+  - Upload and configure contents of the webApp folder for deployment on Amplify.
 
 ### Mosquitto RSMB
 * Download [mosquitto rsmb](!https://github.com/eclipse/mosquitto.rsmb).  
@@ -254,4 +278,4 @@ You can read more specific information about the iAlarm project in this [blog po
 
 ## Demo video
 
-Watch a demo presentation of the iAlarm project [here](https://www.yourdemovideolink.com).
+Watch a demo presentation of the BuzzAlert project [here](https://www.yourdemovideolink.com).
