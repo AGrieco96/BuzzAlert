@@ -5,6 +5,13 @@
 #include "thread.h"
 #include "periph/adc.h"
 #include <math.h>
+#include "periph/pwm.h"
+#include "servo.h"
+#include "cpu.h"
+#include "board.h"
+#include "analog_util.h"
+#include "servo.h"
+
 
 //Networking
 #include "net/emcute.h"
@@ -23,7 +30,22 @@
 #define MQTT_QoS            (EMCUTE_QOS_0)
 
 // Voltage Macros
-#define RES ADC_RES_8BIT
+
+#define ADC_IN_USE                  ADC_LINE(0)
+#define ADC_RES                     ADC_RES_12BIT
+//#define RES 			     ADC_RES_8BIT
+#define DELAY                       (100LU * US_PER_MS) /* 100 ms */
+
+//servo
+#define DEV         PWM_DEV(0)
+#define CHANNEL     0
+#define SERVO_MIN        (1000U)
+#define SERVO_MAX        (2000U)
+
+
+// State Variables
+
+int SECURITY_TYPE=0;
 
 //pins ultrasonic sensor
 
@@ -41,6 +63,9 @@ uint32_t echo_time_start;
 
 int past_read;
 int current_state;
+int raw=0;
+int intensity=0;
+static servo_t servo;
 
 
 
@@ -68,15 +93,15 @@ static void on_pub(const emcute_topic_t *topic, void *data, size_t len){
     strncpy(msg, in, len);
     msg[len] = '\0';
     printf("\nContenuto di msg : %s", msg);
-
- 
-    
-    
     printf("### got publication for topic '%s' [%i] ###\n",
            topic->name, (int)topic->id);
     for (size_t i = 0; i < len; i++) {
         printf("%c", in[i]);
     }
+    SECURITY_TYPE=(int) (in[0] - '0');
+    printf(" SECURITY TYPE IS : %d"  ,SECURITY_TYPE);
+    //SECURITY_TYPE = 0;
+    printf(" SECURITY TYPE IS : %d"  ,SECURITY_TYPE);
     puts("");
 
     //Setting memory for the message buffer
@@ -216,12 +241,12 @@ void echo_cb(void* arg){ //callback function - ultrasonic sensor
 	int val = gpio_read(echo_pin);
 	uint32_t echo_time_stop;
 
-    (void) arg;
+    	(void) arg;
 
 	if(val){
 		echo_time_start = xtimer_now_usec();
 	}
-    else{
+    	else{
 		echo_time_stop = xtimer_now_usec();
 		echo_time = echo_time_stop - echo_time_start;
 	}
@@ -229,21 +254,38 @@ void echo_cb(void* arg){ //callback function - ultrasonic sensor
 
 
 int read_distance(void){ //ultrasonic sensor
+	uint32_t distance;
+	distance=0;
 	echo_time = 0;
 	gpio_clear(trigger_pin);
 	xtimer_usleep(20);
 	gpio_set(trigger_pin);
 	xtimer_msleep(100);
-	return echo_time;
+	if (echo_time > 0){
+		distance = echo_time/58;   // In cm
+	}
+	return distance;
 }
 
 
 void sensor_init(void){ //initializes all the pins
 
+    servo_init(&servo, DEV, CHANNEL, SERVO_MIN, SERVO_MAX);
+    
+    // initialize the ADC line 
+    															
+    if (adc_init(ADC_IN_USE) < 0) {
+	printf("Initialization of ADC_LINE(%u) failed\n", ADC_IN_USE);
+	
+    }
+    else {
+	printf("Successfully initialized ADC_LINE(%u)\n", ADC_IN_USE);
+    }
+						
     gpio_init(trigger_pin, GPIO_OUT);
     gpio_init_int(echo_pin, GPIO_IN, GPIO_BOTH, &echo_cb, NULL); //imposta callback quando riceve input
 
-    adc_init(ADC_LINE(0));
+    
 
     if (gpio_init(led_pin, GPIO_OUT)) {
         printf("Error to initialize GPIO_PIN(%d %d)\n", PORT_B, 10);
@@ -287,67 +329,72 @@ int main(void){
     }
 
     //Sensors Init
-
+    
     xtimer_sleep(3);
     sensor_init();
     past_read=read_distance();
+    int lock_state=0;
     
-    
-    
-    
+     //Main Loop
+      
      while(1){
-        
-        int ultras = read_distance();
-        
-        printf("Distance from object : (%d)\n", ultras);
-        printf("Past Distance from object : (%d)\n", past_read);
-        xtimer_sleep(2);
-        if ( abs(ultras - past_read)  > 1000){
-            current_state = 1;      // Motion detected    --- ALARM!!! ---
-            gpio_set(led_pin);
-            gpio_set(buzzer_pin);
-            xtimer_sleep(2);
-            gpio_clear(led_pin);
-            gpio_clear(buzzer_pin);
-            xtimer_sleep(1);
-        }
-        if(current_state == 1){
+     	     
+     	if(SECURITY_TYPE==0){
+     		lock_state=1;
+		servo_set(&servo, SERVO_MIN);
+		int ultras = read_distance();
+		
+		printf("Distance from object : (%d)\n", ultras);
+		printf("Past Distance from object : (%d)\n", past_read);
+		xtimer_sleep(2);
+		if ( abs(ultras - past_read)  > 3){
+		    puts("ALARM TRIGGERED!!!");
+		    current_state = 1;      // Motion detected    --- ALARM!!! ---
+		    gpio_set(led_pin);
+		    gpio_set(buzzer_pin);
+		    xtimer_sleep(2);
+		    gpio_clear(led_pin);
+		    gpio_clear(buzzer_pin);
+		    xtimer_sleep(1);
+		}
+		if(current_state == 1){
 
-            char message[80];
-            sprintf(message,"%d:%d:%d", ultras, past_read,current_state);
-            publish(MQTT_TOPIC_EXT, message); //publishing message on broker  
+		    char message[80];
+		    sprintf(message,"%d:%d:%d", ultras, past_read,current_state);
+		    publish(MQTT_TOPIC_EXT, message); //publishing message on broker  
 
-        }
+		}
 
-        past_read = ultras;
-        current_state = 0;          // Removing Alarm 
-     }
+		past_read = ultras;
+		current_state = 0;          // Removing Alarm 
+	  }
+     
+     	if(SECURITY_TYPE==1){
+     		//puts("Vibration");
+     		if (lock_state){
+     			servo_set(&servo, SERVO_MAX);    // CLOSING THE LOCK
+     			lock_state=0;
+     		}
+     		
+     		
+     		raw = adc_sample(ADC_IN_USE, ADC_RES);
+        	intensity = adc_util_map(raw, ADC_RES, 10, 1000);
+        	printf("ADC_LINE(%u): raw value: %i, Vibrations Level: %i\n", ADC_IN_USE, raw,intensity);
+        	if(intensity > 900){
+			gpio_set(led_pin);
+			gpio_set(buzzer_pin);
+			xtimer_sleep(2);
+			gpio_clear(led_pin);
+			gpio_clear(buzzer_pin);
+			xtimer_sleep(1);
+			char message[80];
+		        sprintf(message,"%d:%d:%d", 0, 0,0);
+		        publish(MQTT_TOPIC_EXT, message); //publishing message on broker  
+     		}
+     		xtimer_sleep(1);
+	}
 
-    return 0;
+    }
+return 0;
+
 }
-
-/*
-int main(void)
-   printf("RIOT led_ext application\n"
-           "Control an external LED using RIOT GPIO module.\n");
-
-    gpio_t pin_out = GPIO_PIN(PORT_C, 7);
-    if (gpio_init(pin_out, GPIO_OUT)) {
-        printf("Error to initialize GPIO_PIN(%d %d)\n", PORT_C, 7);
-        return -1;
-    }
-
-    while (1) {
-        printf("Set pin to HIGH\n");
-        gpio_set(pin_out);
-
-        xtimer_sleep(2);
-
-        printf("Set pin to LOW\n");
-        gpio_clear(pin_out);
-
-        xtimer_sleep(2);
-    }
-
-    return 0;
-    */

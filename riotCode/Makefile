@@ -3,6 +3,7 @@ APPLICATION = black_app
 BOARD ?= nucleo-f401re
 
 RIOTBASE ?= $(CURDIR)/../../RIOT
+#RIOTBASE ?= $(CURDIR)/../../RIOT-2022.04-branch
 
 # Provide network connectivity via the USB
 
@@ -20,6 +21,8 @@ USEMODULE += gnrc_netif_single  #non necessario
 USEMODULE += stdio_ethos gnrc_uhcpc
 # Include MQTT-SN client
 USEMODULE += emcute
+# Include servo Driver
+USEMODULE += servo
 
 EMCUTE_ID ?= 01
 ETHOS_BAUDRATE ?= 115200
@@ -45,6 +48,7 @@ endif
 USEMODULE += periph_gpio
 USEMODULE += xtimer
 USEMODULE += periph_gpio_irq
+USEMODULE += analog_util
 
 FEATURES_REQUIRED = periph_gpio
 FEATURES_REQUIRED = periph_adc
