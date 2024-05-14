@@ -159,7 +159,7 @@ Data management and transmission in this project utilize the MQTT protocol. The 
 
 - **AWS IoT Core Policy:**
   - An essential part of the operation is the Policy associated with the AWS IoT Core object.
-  - Example Policy: [Policy Link](aWs/thing/blackboard-Policy).
+  - Example Policy: [Policy Link](AwS/thing/blackboard-Policy).
 
 - **IAM Policies for Lambda Functions:**
   - Lambda functions are assigned IAM Policies based on the services they offer, ensuring appropriate permissions.
@@ -278,4 +278,4 @@ You can read more specific information about the iAlarm project in this [blog po
 
 ## Demo video
 
-Watch a demo presentation of the BuzzAlert project [here](https://www.yourdemovideolink.com).
+Watch a demo presentation of the BuzzAlert project [here](https://youtu.be/Rqv_ebcaH50?si=-Pue708B209gE0Bn).
