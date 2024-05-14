@@ -1,7 +1,7 @@
 // ----------- CONSTANT & VARIABLE ------------
 const labels_temp = [];
 
-var current_state = "2"
+var current_state = "0"
 // ----------- INITIALIZATION ------------
 function chart_layout() {
   Plotly.newPlot('myChart', [], {
@@ -127,10 +127,11 @@ function main(){
   read_valueLambdaF();
   console.log(current_state)
   update_status(current_state)
-  /*
+  
+
   // Starting campling data - ogni 10 secondi.
-  setInterval(read_valueLambdaF, 10000)
-  */
+  setInterval(read_valueLambdaF, 5000)
+  
 
 }
 
