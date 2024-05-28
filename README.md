@@ -171,9 +171,7 @@ Data management and transmission in this project utilize the MQTT protocol. The 
 
 ### Network performance
 
-Using a packet analyzer tool it is possible to know the weight of the packets.
-
-So in the first case we have a message that is lees than 37bytes. In the second case in the worst case since we need to send one of [ auto - on - off ] his length is maximum 5bytes . In both cases we have a very short latency, one caused from when the sensor register a new value and the other one from when a button is clicked on the web app to when the system acts. This latency are short enough to not affect the usability of the system.
+Using a packet analyzer tool it is possible to capture the size of the packets, but since we are sending just an integer value it is trivial to analyze them in detail.
 
 ## Data Processing
 
