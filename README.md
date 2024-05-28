@@ -272,7 +272,7 @@ The Cloud part of the project is performed by AWS, that receives the payload,con
 
 ## BlogPost
 
-You can read more specific information about the iAlarm project in this [blog post](https://www.yourblogpostlink.com).
+You can read more specific information about the BuzzAlert project in this [blog post](https://www.hackster.io/antonio-grieco/buzzalert-153abb).
 
 ## Demo video
 
